@@ -23,6 +23,7 @@ namespace WPFtesws
         public MainWindow()
         {
             InitializeComponent();
+            frame.Navigate(new MinecraftToolKit.Pages.Tesws());
         }
     }
 }
