@@ -1,0 +1,8 @@
+{
+  "Servers": [
+    {
+      "Address": "ws://127.0.0.1:29132/mc",
+      "Password": "passwd"
+    }
+  ]
+}

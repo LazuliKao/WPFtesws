@@ -6,11 +6,11 @@
       xmlns:local="clr-namespace:MinecraftToolKit.Pages"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"  
       mc:Ignorable="d" 
-      d:DesignHeight="250" d:DesignWidth="400"
+      d:DesignHeight="250" d:DesignWidth="500"
       Title="tesws">
     <Page.Resources>
         <local:SelectedToBool x:Key="SelectedToBool" />
-        <!--<local:SelectedClientToBool x:Key="SelectedClientToBool" />-->
+        <local:Up0ToBool x:Key="Up0ToBool" /> 
     </Page.Resources>
     <Grid>
         <Grid Margin="5">
@@ -33,22 +33,26 @@
                             <!--<materialDesign:PackIcon Kind="LanConnect" Width="30" Height="30"/>-->
                         </StackPanel>
                     </Button>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Padding="0" ToolTip="Edit Selected Server" IsEnabled="{Binding SelectedIndex,ElementName=SelectServer,Converter={StaticResource SelectedToBool}}" Click="EditServerButton_Click">
+                        <materialDesign:PackIcon Kind="Edit" Width="30" Height="25"/>
+                    </Button>
                     <Button Style="{StaticResource MaterialDesignFlatButton}" Padding="0" ToolTip="Add Server" Click="AddServerButton_Click">
                         <materialDesign:PackIcon Kind="Add" Width="30" Height="30"/>
                     </Button>
                     <Button Style="{StaticResource MaterialDesignFlatButton}" Padding="0" ToolTip="Remove Selected Server" IsEnabled="{Binding SelectedIndex,ElementName=SelectServer,Converter={StaticResource SelectedToBool}}" Click="RemoveServerButton_Click">
                         <materialDesign:PackIcon Kind="Remove" Width="30" Height="30"/>
                     </Button>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Padding="10,0" ToolTip="Clear output" Click="CleanButton_Click" Content="清屏" IsEnabled="{Binding Document.Blocks.Count,ElementName=OutPutText,Converter={StaticResource Up0ToBool},Mode=OneWay}" />
                 </StackPanel>
             </Grid>
             <RichTextBox  Margin="5" Background="AliceBlue" IsReadOnly="True" Grid.Row="1" Name="OutPutText" Block.LineHeight="1"/>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2" Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox FontSize="16" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="150" materialDesign:HintAssist.Hint="Message Content" Name="SendText" VerticalAlignment="Bottom"/>
+                <TextBox AcceptsReturn="True" FontSize="16" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="150" materialDesign:HintAssist.Hint="Message Content" Name="SendText" VerticalAlignment="Bottom"/>
                 <ComboBox Style="{StaticResource MaterialDesignComboBox}" materialDesign:HintAssist.Hint="Message type" Grid.Column="1"
                  Width="150"    Margin="7,0,7,0" Name="SelectAction" materialDesign:TextFieldAssist.HasClearButton="True">
                     <ComboBoxItem>

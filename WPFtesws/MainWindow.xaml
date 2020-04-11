@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WPFtesws" 
            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
          mc:Ignorable="d"
-        Title="TeswsWPF by gxh" Height="450" Width="800">
+        Title="WPFwsClient by gxh" Height="450" Width="800">
     <Grid> 
         <Frame x:Name="frame"/>
     </Grid>
