@@ -43,6 +43,9 @@
     <Reference Include="MaterialDesignColors, Version=1.2.3.1244, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.2.3\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
+    <Reference Include="MaterialDesignExtensions, Version=3.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignExtensions.3.1.0\lib\net45\MaterialDesignExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialDesignThemes.Wpf, Version=3.1.0.1244, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.3.1.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
@@ -133,6 +136,7 @@
 if exist "$(TargetDir)Newtonsoft.Json.xml" (del /F /A /Q "$(TargetDir)Newtonsoft.Json.xml")
 if exist "$(TargetDir)websocket-sharp.xml" (del /F /A /Q "$(TargetDir)websocket-sharp.xml")
 if exist "$(TargetDir)WPFtesws.pdb" (del /F /A /Q "$(TargetDir)WPFtesws.pdb")
-if exist "$(TargetDir)WPFtesws.exe.config" (del /F /A /Q "$(TargetDir)WPFtesws.exe.config")</PostBuildEvent>
+if exist "$(TargetDir)WPFtesws.exe.config" (del /F /A /Q "$(TargetDir)WPFtesws.exe.config")
+if exist "$(TargetDir)MaterialDesignExtensions.xml" (del /F /A /Q "$(TargetDir)MaterialDesignExtensions.xml")</PostBuildEvent>
   </PropertyGroup>
 </Project>

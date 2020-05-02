@@ -22,3 +22,4 @@ C:\Users\gaoxi\source\repos\WPFtesws\WPFtesws\obj\Release\WPFtesws.csproj.Fody.C
 C:\Users\gaoxi\source\repos\WPFtesws\WPFtesws\obj\Release\WPFtesws.csproj.CopyComplete
 C:\Users\gaoxi\source\repos\WPFtesws\WPFtesws\obj\Release\WPFtesws.exe
 C:\Users\gaoxi\source\repos\WPFtesws\WPFtesws\obj\Release\WPFtesws.pdb
+C:\Users\gaoxi\source\repos\WPFtesws\WPFtesws\bin\Release\MaterialDesignExtensions.xml
