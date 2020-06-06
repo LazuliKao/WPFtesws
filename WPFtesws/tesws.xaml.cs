@@ -202,10 +202,13 @@ namespace MinecraftToolKit.Pages
                 }
                 return sTemp.ToUpper();
             }
-            JObject raw = JObject.Parse("{\"operate\":\"runcmd\",\"passwd\":\"token\",\"cmd\":\"say null\"}");
-            raw["cmd"] = cmd;
-            raw["passwd"] = GetMD5(token + DateTime.Now.ToString("yyyyMMddHHmm"));
-            return raw;
+            JObject raw = new JObject() {
+                new JProperty("operate","runcmd"),
+                new JProperty("cmd",cmd),
+                new JProperty("msgid","0")
+            };
+            raw.Add("passwd", GetMD5(token + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None)));
+             return raw;
         }
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
