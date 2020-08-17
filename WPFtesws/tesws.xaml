@@ -58,7 +58,7 @@
                     <ComboBoxItem>
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Text"/>
-                            <TextBlock Text="RawText(%pwd%)"/>
+                            <TextBlock Text="RawText"/>
                         </StackPanel>
                     </ComboBoxItem>
                     <ComboBoxItem>

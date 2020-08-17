@@ -186,28 +186,30 @@ namespace MinecraftToolKit.Pages
                 this.Content = null;
             }
         }
+        private string GetMD5(string sDataIn)
+        {
+            System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            byte[] bytValue, bytHash;
+            bytValue = Encoding.UTF8.GetBytes(sDataIn);
+            bytHash = md5.ComputeHash(bytValue);
+            md5.Clear();
+            string sTemp = "";
+            for (int i = 0; i < bytHash.Length; i++)
+            {
+                sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
+            }
+            return sTemp.ToUpper();
+        }
+
         public JObject GetCmdReq(string token, string cmd)
         {
-            string GetMD5(string sDataIn)
-            {
-                System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-                byte[] bytValue, bytHash;
-                bytValue = Encoding.UTF8.GetBytes(sDataIn);
-                bytHash = md5.ComputeHash(bytValue);
-                md5.Clear();
-                string sTemp = "";
-                for (int i = 0; i < bytHash.Length; i++)
-                {
-                    sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
-                }
-                return sTemp.ToUpper();
-            }
             JObject raw = new JObject() {
                 new JProperty("operate","runcmd"),
                 new JProperty("cmd",cmd),
                 new JProperty("msgid","0"),
                 new JProperty("passwd","")
             };
+            OutPut(token + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
             raw["passwd"] = GetMD5(token + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
             return raw;
         }
@@ -220,9 +222,18 @@ namespace MinecraftToolKit.Pages
                     switch (SelectAction.SelectedIndex)
                     {
                         case 0:
-                            string getStr = SendText.Text.Replace("%pwd%", GetCmdReq(((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString(), null)["passwd"].ToString());
-                            ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).client.SendAsync(getStr, (state) => OutPut(state ? "发送成功=>" + getStr : "发送失败!?"));
-                            OutPut(getStr);
+                            try
+                            {
+                                var raw = JObject.Parse(SendText.Text);
+                                if (raw.ContainsKey("passwd")) raw["passwd"] = "";
+                                OutPut(raw.ToString(Newtonsoft.Json.Formatting.None));
+                                string passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString();
+                                raw["passwd"] = GetMD5(passwd + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
+                                string getStr = raw.ToString(Newtonsoft.Json.Formatting.None);
+                                ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).client.SendAsync(getStr, (state) => OutPut(state ? "发送成功=>" + getStr : "发送失败!?"));
+                                OutPut(getStr);
+                            }
+                            catch (Exception err) { OutPutErr(err); }
                             break;
                         case 1:
                             string cmdStr = GetCmdReq(((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString(), SendText.Text).ToString(Newtonsoft.Json.Formatting.None);

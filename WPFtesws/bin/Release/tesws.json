@@ -1,16 +1,8 @@
 {
   "Servers": [
     {
-      "Address": "ws://114.67.116.188:29130/xsbasur",
-      "Password": "mcbexsba"
-    },
-    {
-      "Address": "ws://114.67.116.188:29132/xsbasur",
-      "Password": "mcbexsba"
-    },
-    {
-      "Address": "ws://localhost:29132/mc",
-      "Password": "passwd"
+      "Address": "ws://localhost:29132/mcws",
+      "Password": "pwd"
     }
   ]
 }
