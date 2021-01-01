@@ -1,8 +1,0 @@
-{
-  "Servers": [
-    {
-      "Address": "ws://localhost:29132/mcws",
-      "Password": "pwd"
-    }
-  ]
-}
