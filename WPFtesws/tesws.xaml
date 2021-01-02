@@ -10,7 +10,9 @@
       Title="tesws">
     <Page.Resources>
         <local:SelectedToBool x:Key="SelectedToBool" />
-        <local:Up0ToBool x:Key="Up0ToBool" /> 
+        <local:Index0ToVis x:Key="Index0ToVis" />
+        <local:Index1ToVis x:Key="Index1ToVis" />
+        <local:Up0ToBool x:Key="Up0ToBool" />
     </Page.Resources>
     <Grid>
         <Grid Margin="5">
@@ -52,7 +54,34 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox AcceptsReturn="True" FontSize="16" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="150" materialDesign:HintAssist.Hint="Message Content" Name="SendText" VerticalAlignment="Bottom"/>
+                <DockPanel>
+                    <CheckBox x:Name="ECCB" IsChecked="True" Visibility="{Binding ElementName=SelectAction,Path=SelectedIndex,Converter={StaticResource  Index0ToVis}}" >
+                        <TextBlock x:Name="ECTXT" Text="加密" Opacity="0.6" FontSize="17" Margin="0,-4,10,0"  />
+                        <CheckBox.Triggers>
+                            <EventTrigger SourceName="ECCB" RoutedEvent="CheckBox.Checked">
+                                <BeginStoryboard  >
+                                    <Storyboard   >
+                                        <DoubleAnimationUsingKeyFrames   Storyboard.TargetName= "ECTXT"  Storyboard.TargetProperty= "Opacity" >
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0:01" Value="1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger> <EventTrigger SourceName="ECCB" RoutedEvent="CheckBox.Unchecked">
+                                <BeginStoryboard  >
+                                    <Storyboard   >
+                                        <DoubleAnimationUsingKeyFrames   Storyboard.TargetName= "ECTXT"  Storyboard.TargetProperty= "Opacity" >
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0:01" Value="0.2"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <!--<Trigger Property="IsChecked" Value="True" SourceName="ECCB">
+                                <Setter Property="Background" Value="Red" />
+                            </Trigger>-->
+                        </CheckBox.Triggers>
+                    </CheckBox>
+                    <TextBox AcceptsReturn="True" FontSize="16" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="150" materialDesign:HintAssist.Hint="Message Content" Name="SendText" VerticalAlignment="Bottom"/>
+                </DockPanel>
                 <ComboBox Style="{StaticResource MaterialDesignComboBox}" materialDesign:HintAssist.Hint="Message type" Grid.Column="1"
                  Width="150"    Margin="7,0,7,0" Name="SelectAction" materialDesign:TextFieldAssist.HasClearButton="True">
                     <ComboBoxItem>

@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Newtonsoft.Json.Linq;
+using PFWebsocketAPI.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,7 +20,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WebSocketSharp;
 
-
 namespace MinecraftToolKit.Pages
 {
     public class SelectedToBool : IValueConverter
@@ -35,6 +35,22 @@ namespace MinecraftToolKit.Pages
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return (int)value > 0;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
+    }
+    public class Index1ToVis : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (int)value == 1 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
+    }
+    public class Index0ToVis : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (int)value == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
@@ -186,32 +202,30 @@ namespace MinecraftToolKit.Pages
                 this.Content = null;
             }
         }
-        private string GetMD5(string sDataIn)
-        {
-            System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-            byte[] bytValue, bytHash;
-            bytValue = Encoding.UTF8.GetBytes(sDataIn);
-            bytHash = md5.ComputeHash(bytValue);
-            md5.Clear();
-            string sTemp = "";
-            for (int i = 0; i < bytHash.Length; i++)
-            {
-                sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
-            }
-            return sTemp.ToUpper();
-        }
+        //private string GetMD5(string sDataIn)
+        //{
+        //    System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+        //    byte[] bytValue, bytHash;
+        //    bytValue = Encoding.UTF8.GetBytes(sDataIn);
+        //    bytHash = md5.ComputeHash(bytValue);
+        //    md5.Clear();
+        //    string sTemp = "";
+        //    for (int i = 0; i < bytHash.Length; i++)
+        //    {
+        //        sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
+        //    }
+        //    return sTemp.ToUpper();
+        //}
 
-        public JObject GetCmdReq(string token, string cmd)
+        public string GetCmdReq(string token, string cmd)
         {
-            JObject raw = new JObject() {
-                new JProperty("operate","runcmd"),
-                new JProperty("cmd",cmd),
-                new JProperty("msgid","0"),
-                new JProperty("passwd","")
-            };
-            OutPut(token + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
-            raw["passwd"] = GetMD5(token + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
-            return raw;
+            ActionRunCmd raw = new ActionRunCmd(cmd, cmd.GetHashCode().ToString(), null);
+            return GetEncryptedReq(raw.ToString(), token);
+        }
+        public string GetEncryptedReq(string from, string token)
+        {
+            EncryptedPack encrypted = new EncryptedPack(EncryptionMode.AES256, from, token);
+            return encrypted.ToString();
         }
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
@@ -224,19 +238,18 @@ namespace MinecraftToolKit.Pages
                         case 0:
                             try
                             {
-                                var raw = JObject.Parse(SendText.Text);
-                                if (raw.ContainsKey("passwd")) raw["passwd"] = "";
-                                OutPut(raw.ToString(Newtonsoft.Json.Formatting.None));
+                                var raw = SendText.Text;
+                                OutPut(raw);
                                 string passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString();
-                                raw["passwd"] = GetMD5(passwd + DateTime.Now.ToString("yyyyMMddHHmm") + "@" + raw.ToString(Newtonsoft.Json.Formatting.None));
-                                string getStr = raw.ToString(Newtonsoft.Json.Formatting.None);
+                                string getStr = raw;
+                                if (ECCB.IsChecked == true) getStr = GetEncryptedReq(raw, passwd);
                                 ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).client.SendAsync(getStr, (state) => OutPut(state ? "发送成功=>" + getStr : "发送失败!?"));
                                 OutPut(getStr);
                             }
                             catch (Exception err) { OutPutErr(err); }
                             break;
                         case 1:
-                            string cmdStr = GetCmdReq(((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString(), SendText.Text).ToString(Newtonsoft.Json.Formatting.None);
+                            string cmdStr = GetCmdReq(((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString(), SendText.Text);
                             ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).client.SendAsync(cmdStr, (state) => OutPut(state ? "发送成功=>" + cmdStr : "发送失败!?"));
                             //SendText.Text 
                             break;
@@ -324,35 +337,61 @@ namespace MinecraftToolKit.Pages
         #endregion
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
         {
-            try
+            ProcessMessage((WebSocket)sender, e.Data);
+        }
+        private void ProcessMessage(WebSocket sender, string message)
+        {
+            //try
+            //{
+            JObject receive = JObject.Parse(message);
+            switch (Enum.Parse(typeof(PackType), receive["type"].ToString()))
             {
-                JObject receive = JObject.Parse(e.Data);
-                switch (receive["operate"].ToString())
-                {
-                    case "runcmd":
-                        if (receive["Auth"].ToString() == "Failed")
-                        {
-                            OutPut(((WebSocket)sender).Url, "命令执行反馈", "密码不匹配！！！");
-                        }
-                        else
-                        {
-                            OutPut(((WebSocket)sender).Url, "命令执行反馈", receive["text"]);
-                        }
-                        return;
-                    default:
-                        break;
-                }
+                case PackType.pack:
+                    switch (Enum.Parse(typeof(ServerCauseType), receive["cause"].ToString()))
+                    {
+                        case ServerCauseType.runcmdfeedback:
+                            CauseRuncmdFeedback feedback = new CauseRuncmdFeedback(receive);
+                            OutPut(sender.Url, "命令执行反馈", feedback.@params.result);
+                            return;
+                    }
+                    //if (receive["Auth"].ToString() == "Failed")
+                    //{
+                    //    OutPut(((WebSocket)sender).Url, "命令执行反馈", "密码不匹配！！！");
+                    //}
+                    //else
+                    //{
+                    // 
+                    //}
+                    break;
+                case PackType.encrypted:
+                    EncryptedPack ep = new EncryptedPack(receive);
+                    switch (ep.@params.mode)
+                    {
+                        case EncryptionMode.AES256:
+                            OutPut(sender.Url, "解密包:" + message);
+                            string passwd = null;
+                            Dispatcher.Invoke(() => passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString());
+                            string decoded = ep.Decode(passwd);
+                            ProcessMessage(sender, decoded);
+                            return;
+                    }
+                    break;
+                //return;
+                default:
+                    break;
             }
-            catch (Exception) { }
+            //}
+            //catch (Exception) { }
             try
             {
-                OutPut((sender as WebSocket).Url, $"收信:\n{JObject.Parse(e.Data)}");
+                OutPut(sender.Url, $"收信:\n{JObject.Parse(message)}");
             }
             catch (Exception)
             {
-                OutPutErr((sender as WebSocket).Url, $"解析失败:{e.Data}");
+                OutPutErr(sender.Url, $"解析失败:{message}");
             }
         }
+
         private void SelectServer_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
