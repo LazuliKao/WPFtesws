@@ -341,47 +341,47 @@ namespace MinecraftToolKit.Pages
         }
         private void ProcessMessage(WebSocket sender, string message)
         {
-            //try
-            //{
-            JObject receive = JObject.Parse(message);
-            switch (Enum.Parse(typeof(PackType), receive["type"].ToString()))
+            try
             {
-                case PackType.pack:
-                    switch (Enum.Parse(typeof(ServerCauseType), receive["cause"].ToString()))
-                    {
-                        case ServerCauseType.runcmdfeedback:
-                            CauseRuncmdFeedback feedback = new CauseRuncmdFeedback(receive);
-                            OutPut(sender.Url, "命令执行反馈", feedback.@params.result);
-                            return;
-                    }
-                    //if (receive["Auth"].ToString() == "Failed")
-                    //{
-                    //    OutPut(((WebSocket)sender).Url, "命令执行反馈", "密码不匹配！！！");
-                    //}
-                    //else
-                    //{
-                    // 
-                    //}
-                    break;
-                case PackType.encrypted:
-                    EncryptedPack ep = new EncryptedPack(receive);
-                    switch (ep.@params.mode)
-                    {
-                        case EncryptionMode.AES256:
-                            OutPut(sender.Url, "解密包:" + message);
-                            string passwd = null;
-                            Dispatcher.Invoke(() => passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString());
-                            string decoded = ep.Decode(passwd);
-                            ProcessMessage(sender, decoded);
-                            return;
-                    }
-                    break;
-                //return;
-                default:
-                    break;
+                JObject receive = JObject.Parse(message);
+                switch (Enum.Parse(typeof(PackType), receive["type"].ToString()))
+                {
+                    case PackType.pack:
+                        switch (Enum.Parse(typeof(ServerCauseType), receive["cause"].ToString()))
+                        {
+                            case ServerCauseType.runcmdfeedback:
+                                CauseRuncmdFeedback feedback = new CauseRuncmdFeedback(receive);
+                                OutPut(sender.Url, "命令执行反馈", feedback.@params.result);
+                                return;
+                        }
+                        //if (receive["Auth"].ToString() == "Failed")
+                        //{
+                        //    OutPut(((WebSocket)sender).Url, "命令执行反馈", "密码不匹配！！！");
+                        //}
+                        //else
+                        //{
+                        // 
+                        //}
+                        break;
+                    case PackType.encrypted:
+                        EncryptedPack ep = new EncryptedPack(receive);
+                        switch (ep.@params.mode)
+                        {
+                            case EncryptionMode.AES256:
+                                OutPut(sender.Url, "解密包:" + message);
+                                string passwd = null;
+                                Dispatcher.Invoke(() => passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString());
+                                string decoded = ep.Decode(passwd);
+                                ProcessMessage(sender, decoded);
+                                return;
+                        }
+                        break;
+                    //return;
+                    default:
+                        break;
+                }
             }
-            //}
-            //catch (Exception) { }
+            catch (Exception) { }
             try
             {
                 OutPut(sender.Url, $"收信:\n{JObject.Parse(message)}");
