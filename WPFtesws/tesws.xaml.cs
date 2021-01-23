@@ -1,6 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Newtonsoft.Json.Linq;
-using PFWebsocketAPI.Model;
+//using PFWebsocketAPI.Model;
+using PFWebsocketAPI.PFWebsocketAPI.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -102,6 +103,58 @@ namespace MinecraftToolKit.Pages
                 catch (Exception err)
                 { OutPutErr("配置文件读取失败" + err.Message); }
             }
+#if false
+//test
+            try
+            {
+                string GetMD5(string sDataIn)
+                {
+                    var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+                    byte[] bytValue, bytHash;
+                    bytValue = Encoding.UTF8.GetBytes(sDataIn);
+                    bytHash = md5.ComputeHash(bytValue);
+                    md5.Clear();
+                    string sTemp = "";
+                    for (int i = 0, loopTo = bytHash.Length - 1; i <= loopTo; i++)
+                        sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
+                    return sTemp.ToUpper();
+                }
+                {
+                    string text = "操";
+                    string password = "1234ddddddddddddddddddddddddddd56a";
+                    string md5 = GetMD5(password);
+                    //byte[] md5bytes = Encoding.UTF8.GetBytes(md5);
+                    OutPut("raw\t\t" + text);
+                    OutPut("password\t" + password);
+                    OutPut("passwordMd5\t" + md5);
+            #region AES_CBC
+                    {
+                        //byte[] keyRaw = new byte[16];
+                        //byte[] ivRaw = new byte[16];
+                        //for (int i = 0; i < keyRaw.Length; i++)
+                        //    keyRaw[i] = md5bytes[i];
+                        //for (int i = 0; i < ivRaw.Length; i++)
+                        //    ivRaw[i] = md5bytes[i];
+                        //string iv = Encoding.UTF8.GetString(ivRaw);
+                        //string key = Encoding.UTF8.GetString(keyRaw); 
+                        string iv = md5.Substring(16);
+                        string key = md5.Remove(16);
+                        OutPut("key\t" + key);
+                        OutPut("iv\t" + iv);
+                        var encryptString =  EasyEncryption.AES.Encrypt(text, key, iv);
+                        OutPut("encrypted\t" + encryptString);
+                        var result = EasyEncryption.AES.Decrypt(encryptString, key, iv);
+                        OutPut("result\t" + result);
+                    }
+            #endregion
+                }
+            }
+            catch (Exception e)
+            {
+                OutPutErr(e);
+            }
+#endif
+
         }
         #region 添加/编辑
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -224,7 +277,7 @@ namespace MinecraftToolKit.Pages
         }
         public string GetEncryptedReq(string from, string token)
         {
-            EncryptedPack encrypted = new EncryptedPack(EncryptionMode.AES256, from, token);
+            EncryptedPack encrypted = new EncryptedPack(EncryptionMode.aes_cbc_pck7padding, from, token);
             return encrypted.ToString();
         }
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
@@ -365,16 +418,16 @@ namespace MinecraftToolKit.Pages
                         break;
                     case PackType.encrypted:
                         EncryptedPack ep = new EncryptedPack(receive);
-                        switch (ep.@params.mode)
-                        {
-                            case EncryptionMode.AES256:
-                                OutPut(sender.Url, "解密包:" + message);
-                                string passwd = null;
-                                Dispatcher.Invoke(() => passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString());
-                                string decoded = ep.Decode(passwd);
-                                ProcessMessage(sender, decoded);
-                                return;
-                        }
+                        //switch (ep.@params.mode)
+                        //{
+                        //    case EncryptionMode.aes_cbc_pck7padding:
+                        OutPut(sender.Url, "解密包:" + message);
+                        string passwd = null;
+                        Dispatcher.Invoke(() => passwd = ((WS)((ComboBoxItem)SelectServer.SelectedItem).Tag).info["Password"].ToString());
+                        string decoded = ep.Decode(passwd);
+                        ProcessMessage(sender, decoded);
+                        //return;
+                        //}
                         break;
                     //return;
                     default:
