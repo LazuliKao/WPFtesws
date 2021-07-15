@@ -397,6 +397,7 @@ namespace MinecraftToolKit.Pages
             try
             {
                 JObject receive = JObject.Parse(message);
+                //OutPut(Enum.Parse(typeof(PackType), receive["type"].ToString()));
                 switch (Enum.Parse(typeof(PackType), receive["type"].ToString()))
                 {
                     case PackType.pack:
@@ -417,6 +418,7 @@ namespace MinecraftToolKit.Pages
                         //}
                         break;
                     case PackType.encrypted:
+                     
                         EncryptedPack ep = new EncryptedPack(receive);
                         //switch (ep.@params.mode)
                         //{
@@ -428,13 +430,14 @@ namespace MinecraftToolKit.Pages
                         ProcessMessage(sender, decoded);
                         //return;
                         //}
-                        break;
-                    //return;
+                        return;
                     default:
                         break;
                 }
             }
-            catch (Exception) { }
+            catch (Exception ex) {
+                OutPutErr(sender.Url, $"解析失败:{ex}");
+            }
             try
             {
                 OutPut(sender.Url, $"收信:\n{JObject.Parse(message)}");

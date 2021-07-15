@@ -156,6 +156,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
         }
     }
 
+    public class Vec3 { public float x, y, z; }
     [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))] // 基本包类型
     public enum PackType
     {
@@ -188,8 +189,8 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
 
     internal class EncryptedPack : PackBase    // 加密包
     {
-         
-        public override PackType type { get;   } = PackType.encrypted;
+
+        public override PackType type { get; } = PackType.encrypted;
 
         public ParamMap @params;
 
@@ -250,7 +251,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
 
     internal class OriginalPack : PackBase   // 普通包/解密后的包
     {
-        public override PackType type { get;   } = PackType.pack;
+        public override PackType type { get; } = PackType.pack;
     }
 
     /* TODO ERROR: Skipped RegionDirectiveTrivia */
@@ -261,6 +262,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
         join,
         left,
         cmd,
+        mobdie,
         runcmdfeedback,
         decodefailed,
         invalidrequest
@@ -285,7 +287,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { sender = sender, xuid = xuid, uuid = uuid, ip = ip };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.join;
+        public override ServerCauseType cause { get; } = ServerCauseType.join;
 
         public ParamMap @params;
 
@@ -307,7 +309,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { sender = sender, xuid = xuid, uuid = uuid, ip = ip };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.left;
+        public override ServerCauseType cause { get; } = ServerCauseType.left;
 
         public ParamMap @params;
 
@@ -329,7 +331,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { sender = sender, text = text };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.chat;
+        public override ServerCauseType cause { get; } = ServerCauseType.chat;
 
         public ParamMap @params;
 
@@ -338,26 +340,44 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             public string sender, text;
         }
     }
-
     internal class CauseCmd : ServerPackBase
     {
         internal CauseCmd(JObject json)
         {
             @params = GetParams<ParamMap>(json);
         }
-
         internal CauseCmd(string sender, string text)
         {
             @params = new ParamMap() { sender = sender, text = text };
         }
+        public override ServerCauseType cause { get; } = ServerCauseType.cmd;
+        public ParamMap @params;
+        internal class ParamMap
+        {
+            public string sender, text;
+        }
+    }
+    internal class CauseMobDie : ServerPackBase
+    {
+        internal CauseMobDie(JObject json)
+        {
+            @params = GetParams<ParamMap>(json);
+        }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.cmd;
+        internal CauseMobDie(string mobtype, string mobname, int dmcase, string srctype, string srcname, Vec3 pos)
+        {
+            @params = new ParamMap() { mobname=mobname,mobtype=mobtype,dmcase=dmcase,srctype=srctype,srcname=srcname,pos=pos};
+        }
+
+        public override ServerCauseType cause { get; } = ServerCauseType.mobdie;
 
         public ParamMap @params;
 
         internal class ParamMap
         {
-            public string sender, text;
+            public int dmcase;
+            public string mobtype, mobname, srctype, srcname;
+            public Vec3 pos;
         }
     }
     // 命令返回
@@ -373,7 +393,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { id = id, cmd = cmd, result = result, con = con };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.runcmdfeedback;
+        public override ServerCauseType cause { get; } = ServerCauseType.runcmdfeedback;
 
         public ParamMap @params;
 
@@ -402,7 +422,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { msg = msg };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.decodefailed;
+        public override ServerCauseType cause { get; } = ServerCauseType.decodefailed;
 
         public ParamMap @params;
 
@@ -424,7 +444,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
             @params = new ParamMap() { msg = msg };
         }
 
-        public override ServerCauseType cause { get;   } = ServerCauseType.invalidrequest;
+        public override ServerCauseType cause { get; } = ServerCauseType.invalidrequest;
 
         public ParamMap @params;
 
@@ -454,7 +474,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
         // Friend Sub New(json As JObject)
         // params = GetParams(Of ParamMap)(json)
         // End Sub
-        
+
 
         internal ActionRunCmd(JObject json, object con)
         {
@@ -466,9 +486,7 @@ namespace PFWebsocketAPI.PFWebsocketAPI.Model
         {
             @params = new ParamMap() { cmd = cmd, id = id, con = con };
         }
-
-        public override ClientActionType action { get;   } = ClientActionType.runcmdrequest;
-
+        public override ClientActionType action { get; } = ClientActionType.runcmdrequest;
         public ParamMap @params;
 
         internal class ParamMap
